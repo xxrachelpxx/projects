@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan & Done</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f9; /* Light gray background */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #3E4A89;
+            color: white;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            color: #3E4A89;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 20px 30px; /* Add horizontal padding for better spacing */
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px; /* Increased spacing between input groups */
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px; /* Adds space below the label */
+            color: #555555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px; /* Reduced padding for better spacing */
+            font-size: 16px;
+            border: 1px solid #3E4A89;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+        }
+
+        button {
+            padding: 12px;
+            background: #3E4A89;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Ensures alignment with the textboxes */
+        }
+
+        button:hover {
+            background: #2E3C6C;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+        }
+
+        .modal-footer a {
+            color: #3E4A89;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .modal-footer a:hover {
+            text-decoration: underline;
+        }
+        /* Flash Message Container */
+        .flash {
+            margin: 20px auto; /* Center align and spacing */
+            padding: 15px 20px; /* Comfortable padding */
+            border-radius: 8px; /* Rounded corners */
+            font-size: 16px; /* Readable text size */
+            font-weight: 500; /* Slightly bold for emphasis */
+            width: 90%; /* Adapt to small screens */
+            max-width: 600px; /* Limit size on larger screens */
+            text-align: center; /* Center-align text */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+            position: relative; /* For close button positioning */
+            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth animations */
+        }
+
+        /* Success Flash */
+        .flash-success {
+            background-color: #d4edda; /* Light green background */
+            color: #155724; /* Dark green text */
+            border: 1px solid #c3e6cb; /* Green border */
+        }
+
+        /* Error Flash */
+        .flash-error {
+            background-color: #f8d7da; /* Light red background */
+            color: #721c24; /* Dark red text */
+            border: 1px solid #f5c6cb; /* Red border */
+        }
+
+        /* Close Button for Flash Messages */
+        .flash .close {
+            position: absolute;
+            top: 50%; /* Center vertically */
+            right: 15px; /* Align to the right */
+            transform: translateY(-50%); /* Adjust centering */
+            font-size: 18px; /* Easy-to-click size */
+            font-weight: bold;
+            color: #555; /* Neutral color */
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .flash .close:hover {
+            color: #000; /* Darker color on hover */
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Plan & Done</div>
+    <nav>
+        <ul>
+            <li><a href="#" id="login-btn">Login</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div id="flash-messages">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <div>
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">
+                        <span class="close">&times;</span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+
+
+<div class="hero">
+    <h1>Plan & Done</h1>
+</div>
+
+<!-- Modal -->
+<div id="login-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-modal">&times;</span>
+        <h2>Login</h2>
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+        <div class="modal-footer">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get modal and buttons
+    const modal = document.getElementById('login-modal');
+    const loginBtn = document.getElementById('login-btn');
+    const closeModal = document.getElementById('close-modal');
+
+    // Show modal on login button click
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.style.display = 'block';
+    });
+
+    // Hide modal on close button click
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Hide modal on clicking outside of modal content
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+    // Functionality to dismiss flash messages
+    document.querySelectorAll('.flash .close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', () => {
+            const flashMessage = closeBtn.parentElement;
+            flashMessage.style.opacity = '0'; // Fade out
+            flashMessage.style.transform = 'translateY(-10px)'; // Slide up
+            setTimeout(() => {
+                flashMessage.remove(); // Remove element after animation
+            }, 300); // Matches the CSS transition duration
+        });
+    });
+
+    // Optional: Automatically dismiss flash messages after 5 seconds
+    setTimeout(() => {
+        document.querySelectorAll('.flash').forEach(flashMessage => {
+            flashMessage.style.opacity = '0'; // Fade out
+            flashMessage.style.transform = 'translateY(-10px)'; // Slide up
+            setTimeout(() => {
+                flashMessage.remove(); // Remove element
+            }, 300);
+        });
+    }, 5000); // Auto-dismiss after 5 seconds
+</script>
+
+</body>
+</html>
