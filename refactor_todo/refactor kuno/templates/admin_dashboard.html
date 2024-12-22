@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Plan & Done</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #3E4A89;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card {
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h4 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 16px;
+        }
+
+        .card button {
+            padding: 10px 15px;
+            background-color: #3E4A89;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .card button:hover {
+            background-color: #2E3C6C;
+        }
+
+        footer {
+            background-color: #3E4A89;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Modal (hidden by default) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4); /* Black with opacity */
+            overflow: auto;
+            padding-top: 60px;
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Centering the modal */
+        .modal .modal-content {
+            text-align: center;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+        }
+
+        .actions button {
+            padding: 5px 10px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .actions button:hover {
+            background-color: #e45a5a;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Plan & Done</div>
+    <nav>
+        <ul>
+            <li><a href="#">Settings</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="card">
+        <h4>Welcome, Admin - {{ session['user_name'] }}!</h4>
+        <p>Here's a quick overview of your dashboard. You can manage users, tasks, and more.</p>
+    </div>
+
+    <div class="card">
+        <h4>User Management</h4>
+        <p>Manage registered users and their roles.</p>
+        <button id="main-view-users">View Users</button>
+    </div>
+
+    <div class="card">
+        <h4>Task Management</h4>
+        <p>Oversee tasks that users are working on.</p>
+        <button id="main-view-tasks">View Tasks</button>
+    </div>
+
+    <div class="card">
+        <h4>Reports</h4>
+        <p>Generate reports about user activity and task completion.</p>
+        <button id="main-view-reports">View Reports</button>
+    </div>
+</div>
+
+<!-- Modal for User Management -->
+<div id="usersModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-users">&times;</span>
+        <h3>Manage Users</h3>
+        <table id="usersTable" border="1" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by loadUsers() -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal for Task Management -->
+<div id="tasksModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-tasks">&times;</span>
+        <h3>Manage Tasks</h3>
+        <p>Here you can view and manage tasks.</p>
+    </div>
+</div>
+
+<!-- Modal for Reports -->
+<div id="reportsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-reports">&times;</span>
+        <h3>Generate Reports</h3>
+        <p>Here you can generate user activity and task completion reports.</p>
+    </div>
+</div>
+
+<footer>
+    &copy; 2024 Plan & Done. All Rights Reserved.
+</footer>
+
+<script>
+    // Get modal elements
+    var usersModal = document.getElementById("usersModal");
+    var tasksModal = document.getElementById("tasksModal");
+    var reportsModal = document.getElementById("reportsModal");
+
+    // Get buttons to open modals
+    var viewUsersButton = document.getElementById("main-view-users");
+    var viewTasksButton = document.getElementById("main-view-tasks");
+    var viewReportsButton = document.getElementById("main-view-reports");
+
+    // Get the <span> elements to close modals
+    var closeUsers = document.getElementById("close-users");
+    var closeTasks = document.getElementById("close-tasks");
+    var closeReports = document.getElementById("close-reports");
+
+    // When the user clicks the "View Users" button, open the Users Modal
+    viewUsersButton.onclick = function() {
+        usersModal.style.display = "block";
+        loadUsers();  // Load users dynamically
+    }
+
+    // When the user clicks the "View Tasks" button, open the Tasks Modal
+    viewTasksButton.onclick = function() {
+        tasksModal.style.display = "block";
+    }
+
+    // When the user clicks the "View Reports" button, open the Reports Modal
+    viewReportsButton.onclick = function() {
+        reportsModal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    closeUsers.onclick = function() {
+        usersModal.style.display = "none";
+    }
+
+    closeTasks.onclick = function() {
+        tasksModal.style.display = "none";
+    }
+
+    closeReports.onclick = function() {
+        reportsModal.style.display = "none";
+    }
+
+    // Function to load users dynamically (You would replace this with an AJAX call in a real application)
+    function loadUsers() {
+        fetch('/api/users') // Fetch data from the Flask back-end
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json(); // Parse JSON response
+            })
+            .then(users => {
+                var tableBody = document.querySelector('#usersTable tbody');
+                tableBody.innerHTML = ''; // Clear existing table content
+
+                // Populate the table with user data
+                users.forEach(user => {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td class="actions">
+                            <button onclick="deleteUser(${user.id})">Delete</button>
+                            <button onclick="blockAccess(${user.id}, ${!user.is_blocked})">
+                                ${user.is_blocked ? 'Unblock' : 'Block'} Access
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error loading users:', error));
+    }
+
+    // Function to delete a user
+    function deleteUser(userId) {
+        fetch('/delete-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: userId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Deleted user with ID: ' + userId);
+                // Optionally refresh the user table or remove the user row from the table
+                document.getElementById(`user-row-${userId}`).remove();
+            } else {
+                alert('Failed to delete user. ' + (data.error || ''));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Function to block a user's access
+    function blockAccess(userId) {
+        fetch('/block-user', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: userId, is_blocked: true }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Blocked access for user with ID: ' + userId);
+                // Optionally update the UI to reflect the blocked status
+                document.getElementById(`user-status-${userId}`).innerText = 'Blocked';
+            } else {
+                alert('Failed to block access. ' + (data.error || ''));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+</script>
+
+</body>
+</html>
